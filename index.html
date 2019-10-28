@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <style>
+      img {
+        height: 3em;
+        float: right;
+        margin-right: 10px;
+      }
+    </style>
     <script
       src="https://code.jquery.com/jquery-3.4.1.min.js"
       integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
@@ -36,5 +43,101 @@
         <tbody></tbody>
       </table>
     </div>
+    <script>
+      let data;
+      $.getJSON(
+        "https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=CWB-77F7EF76-6578-458C-ACDF-72ABF4BE7727&downloadType=WEB&format=JSON"
+      )
+        .done(function(re) {
+          /* Initialize data */
+          data = re.cwbopendata.dataset.location;
+
+          let date1 = new Date(data[0].weatherElement[0].time[0].startTime);
+          let date2 = new Date(data[0].weatherElement[0].time[1].startTime);
+          let date3 = new Date(data[0].weatherElement[0].time[2].startTime);
+
+          let state1 =
+            6 <= date1.getHours() && date1.getHours() < 18 ? "day" : "night";
+          let state2 =
+            6 <= date2.getHours() && date2.getHours() < 18 ? "day" : "night";
+          let state3 =
+            6 <= date3.getHours() && date3.getHours() < 18 ? "day" : "night";
+          // console.log(date2.getHours());
+
+          /* Process title timestamp */
+          let hourtext = new Array();
+          hourtext[0] = "凌晨";
+          hourtext[6] = "白天";
+          hourtext[12] = "下午";
+          hourtext[18] = "晚上";
+
+          $("thead")
+            .find("th")
+            .eq(2)
+            .text(
+              `${date1.getFullYear()}-${date1.getMonth() +
+                1}-${date1.getDate()} ${hourtext[date1.getHours()]}`
+            );
+          $("thead")
+            .find("th")
+            .eq(3)
+            .text(
+              `${date2.getFullYear()}-${date2.getMonth() +
+                1}-${date2.getDate()} ${hourtext[date2.getHours()]}`
+            );
+          $("thead")
+            .find("th")
+            .eq(4)
+            .text(
+              `${date3.getFullYear()}-${date3.getMonth() +
+                1}-${date3.getDate()} ${hourtext[date3.getHours()]}`
+            );
+
+          /* Process area weather data */
+          let print = "";
+          for (let i = 0; i < data.length; i++) {
+            print += `
+            <tr>
+              <td>${i + 1}</td>
+              <td>${data[i].locationName}</td>
+              <td>
+                ${data[i].weatherElement[0].time[0].parameter.parameterName}
+                <img src="img/${state1}/${
+              data[i].weatherElement[0].time[0].parameter.parameterValue
+            }.svg"> | 溫度 
+                ${data[i].weatherElement[2].time[0].parameter.parameterName}~${
+              data[i].weatherElement[1].time[0].parameter.parameterName
+            }℃
+              </td>
+              <td>
+                ${data[i].weatherElement[0].time[1].parameter.parameterName}
+                <img src="img/${state2}/${
+              data[i].weatherElement[0].time[1].parameter.parameterValue
+            }.svg"> | 溫度 
+                ${data[i].weatherElement[2].time[1].parameter.parameterName}~${
+              data[i].weatherElement[1].time[1].parameter.parameterName
+            }℃
+              </td>
+              <td>
+                ${data[i].weatherElement[0].time[2].parameter.parameterName}
+                <img src="img/${state3}/${
+              data[i].weatherElement[0].time[2].parameter.parameterValue
+            }.svg"> | 溫度 
+                ${data[i].weatherElement[2].time[2].parameter.parameterName}~${
+              data[i].weatherElement[1].time[2].parameter.parameterName
+            }℃
+              </td>
+            </tr>
+          `;
+          }
+          $("tbody").html(print);
+
+          /* Apply DataTables to table */
+          $("#data-table").DataTable();
+        })
+        .fail(function(gg) {
+          alert("API串接失敗");
+        });
+    </script>
   </body>
 </html>
