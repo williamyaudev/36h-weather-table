@@ -1,6 +1,6 @@
 # 36h-weather-table
 
-This is a experimental project for customizing Bootstrap with Sass, and will potentially exhibit larger amount of data in comparison to my existing project.
+This is a 36 hours weather table of all cities in Taiwan using the government Open Data API.
 
 ## Acknowledgements
 
